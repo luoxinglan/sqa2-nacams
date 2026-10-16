@@ -1,0 +1,38 @@
+# Java / Maven
+target/
+*.class
+*.jar
+
+# Node / Vue
+node_modules/
+dist/
+*.local
+npm-debug.log*
+pnpm-debug.log*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# 环境变量与密钥（连接串写在 application-local.yml，模板提交 application-local.yml.example）
+.env
+.env.*
+application-local.yml
+
+# 数据库导出/备份文件（schema.sql 与初始化数据脚本正常提交）
+*.sql.bak
+/backups/
+*.db
+
+# 日志与临时
+logs/
+*.log
+~$*
+
+# 操作系统
+Thumbs.db
+.DS_Store
