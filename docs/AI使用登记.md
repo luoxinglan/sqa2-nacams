@@ -33,3 +33,4 @@
 | 2026-10-16 | ZCode（GLM） | 按需求框架 V3.3.1 与合同 24 项验收指标起草前后端接口契约草案 `接口规范_SQA2_20261016.md`（REST 通用约定、约 45 个接口明细、提供方/消费方分工矩阵、联调与冻结流程）；供韦政治细化定稿（10-17 12:00 冻结），AI 起草、待韦政治与前端复核（AGENTS.md v1.24） | 组长 |
 | 2026-10-16 | ZCode（GLM） | 技术栈决策记录与路线规划：组长定 A 方案（Spring Boot 3＋MySQL 8＋Vue 3＋Element Plus），回填开发任务分工卡 §1、README 快速事实表、AGENTS.md v1.25，并给出 10-16 晚～10-20 交付冲刺路线图 | 组长 |
 | 2026-10-16 | ZCode（GLM） | 版本同步方案落地：建立本地 git 仓库 `sqa2-nacams`（C 盘工作区，.gitignore＋README 协作规约＋docs/ 开发文档副本，首 commit 436e108），配置 github.com 域级代理；AGENTS.md 升 v1.26、分工卡军规补 git 协作第 6 条 | 组长 |
+| 2026-10-16 | ZCode（GLM） | GitHub 推送与状态入档：配置 GCM 凭据后推送 main（2 提交）至私有仓库 luoxinglan/sqa2-nacams；同步文档至仓库 docs/ 并二次推送；AGENTS.md 升 v1.27（协作者待办与私有性理由），README/分工卡补仓库地址；同步记忆 | 组长 |
