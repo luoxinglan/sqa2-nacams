@@ -1,0 +1,47 @@
+# SQA2 · 网络攻防对抗技术研究所管理系统（开发仓库）
+
+> 北京理工大学 2026 秋《软件质量保障》SQA2 组 · 乙方=北京盾阵科技有限公司。
+> **本仓库只放代码与开发文档**；课程材料（需求框架 PDF、基础数据 xlsx、往届样例）在各人本地的项目课程文件夹 `01_老师下发/` 中，**禁止提交到本仓库**。
+
+## 技术栈（2026-10-16 定稿）
+
+- 后端 `backend/`：Java 17 ＋ Spring Boot 3.x（Maven）＋ MyBatis-Plus ＋ MySQL 8（分包 auth/portal/library/admin/validation/backup）
+- 前端 `frontend/`：Vue 3 ＋ Vite ＋ Vue Router ＋ Pinia ＋ Element Plus ＋ Axios
+- 接口契约：`docs/接口规范_SQA2_20261016.md`（10-17 12:00 冻结 v1.0，以文档为仲裁）
+
+## 目录
+
+```
+sqa2-nacams/
+├── docs/                        # 开发期权威文档副本（直接在此修改并 commit）
+│   ├── AGENTS.md                #   课程/项目总说明（AI 助手先读它）
+│   ├── 开发任务分工_SQA2_20261016.md  #   5 人任务清单（认领自己的部分）
+│   ├── 接口规范_SQA2_20261016.md      #   前后端接口契约
+│   └── AI使用登记.md             #   凡用 AI 产出，必须在此追加一行后随代码提交
+├── backend/                     # Spring Boot（待搭骨架）
+└── frontend/                    # Vue 3（待搭骨架）
+```
+
+## 协作规约（5 人 4 天，从简从严）
+
+1. **单 main 分支＋小步提交**：每完成一个小功能就 commit＋push，不要攒一天；提交信息格式 `模块: 做了什么`（例：`library: 借阅上限校验`、`portal: 新闻列表页`）。
+2. **每日 21:00 前 push**（等于进度打卡）；push 前先 `git pull --rebase`。
+3. 冲突解决不了不要硬推，群里 @组长 仲裁；接口不符以 `docs/接口规范` 为准改代码，不口头改契约。
+4. **禁止提交**：老师下发材料、他组文件、`node_modules/`、`target/`、数据库备份、`.env`/本地配置（模板文件除外）。
+5. **AI 使用登记**：用了任何 AI 工具（Copilot/Cursor/Claude/ChatGPT 等），当天在 `docs/AI使用登记.md` 追加一行再提交——这是课程硬要求，交付时要出声明。
+6. 敏感信息（数据库密码等）放 `application-local.yml`（已 gitignore），提交 `application-local.yml.example` 模板。
+
+## 快速开始（骨架生成后补充运行说明）
+
+```bash
+# 后端（待补）
+# 前端（待补）
+```
+
+## 访问 GitHub 慢的成员
+
+clone/pull 慢时自配代理（Clash 默认混合端口）：
+```bash
+git config --global http.https://github.com.proxy http://127.0.0.1:7897
+```
+或改用手机热点；实在不行组长每日打 zip 发群（最后手段，放弃版本同步）。
