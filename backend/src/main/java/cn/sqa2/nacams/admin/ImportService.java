@@ -77,7 +77,9 @@ public class ImportService {
                 var matches=db.jdbc.queryForList("SELECT id FROM users WHERE name=? AND identity_type IN('teacher','student')",val(p,"借阅人"));
                 if(matches.size()!=1)throw new ApiException(422,"借阅人未匹配或重名；原始行已保留，请人工核对");
                 // 老师无日期数据：只形成明确标识的已归还历史演示记录，绝不伪造在借/违规。
-                var returned=date.minusDays((long)row.number()*7);var borrowed=returned.minusDays(7);
+                var returned=date.minusDays((long)row.number()*2);var borrowed=returned.minusDays(1);
+                int purchased=((Number)db.one("SELECT purchase_year FROM books WHERE id=?",book.get("id")).get("purchase_year")).intValue();
+                if(borrowed.isBefore(LocalDate.of(purchased,1,1)))throw new ApiException(422,"演示借出日期早于购书年份，请调整demoDate或购买年份假设");
                 db.jdbc.update("INSERT INTO borrows(user_id,book_id,borrowed_at,due_at,returned_at,source_key,source_json) VALUES(?,?,?,?,?,?,?)",matches.get(0).get("id"),book.get("id"),Timestamp.valueOf(borrowed.atStartOfDay()),Timestamp.valueOf(borrowed.plusDays(30).atStartOfDay()),Timestamp.valueOf(returned.atStartOfDay()),key,json.write(Map.of("original",p,"datesSynthetic",true,"demoDate",date.toString())));
             }
             case "theses"->{title=val(p,"学位论文名称");db.jdbc.update("INSERT INTO theses(source_key,student_no,author,title,source_json) VALUES(?,?,?,?,?)",key,val(p,"学号"),val(p,"姓名"),title,raw);}

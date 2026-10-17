@@ -5,6 +5,7 @@ import cn.sqa2.nacams.common.Api;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name="bearerAuth")
 @RestController
 @RequestMapping("/api/v1/admin/users")
 public class UserController {

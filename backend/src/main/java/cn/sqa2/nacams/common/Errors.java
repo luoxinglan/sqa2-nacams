@@ -29,6 +29,12 @@ public class Errors {
     }
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Api<Object>> tooLarge(Exception e) { return business(new ApiException(413, "上传文件超出限制")); }
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Api<Object>> notFound(Exception e) { return business(new ApiException(404,"接口或资源不存在")); }
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Api<Object>> wrongMethod(Exception e) { return business(new ApiException(405,"HTTP方法不支持")); }
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<Api<Object>> missingFile(Exception e) { return business(new ApiException(400,"缺少上传文件file")); }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Api<Object>> unexpected(Exception e) {
         LOG.error("Request failed", e);
