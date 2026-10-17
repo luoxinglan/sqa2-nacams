@@ -1,0 +1,179 @@
+-- MySQL 8 / utf8mb4。只创建缺失表，重启不清库；升级须另写迁移。
+CREATE TABLE IF NOT EXISTS users (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ username VARCHAR(100) NOT NULL UNIQUE,
+ password_hash VARCHAR(100) NOT NULL,
+ role VARCHAR(16) NOT NULL DEFAULT 'user',
+ identity_type VARCHAR(16) NOT NULL,
+ name VARCHAR(100) NOT NULL,
+ is_director BOOLEAN NOT NULL DEFAULT FALSE,
+ is_librarian BOOLEAN NOT NULL DEFAULT FALSE,
+ active BOOLEAN NOT NULL DEFAULT TRUE,
+ profile_json LONGTEXT NOT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS teachers (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL UNIQUE,
+ employee_no VARCHAR(10) UNIQUE,
+ teacher_type VARCHAR(16) NOT NULL,
+ appointment_no VARCHAR(100),
+ appointment_term VARCHAR(100),
+ source_json LONGTEXT,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ UNIQUE(user_id, appointment_no)
+);
+CREATE TABLE IF NOT EXISTS students (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL UNIQUE,
+ student_no VARCHAR(10) NOT NULL UNIQUE,
+ status VARCHAR(24) NOT NULL,
+ enrollment_year INT,
+ advisor_name VARCHAR(100),
+ advisor_employee_no VARCHAR(10),
+ advisor_user_id BIGINT,
+ source_json LONGTEXT,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ FOREIGN KEY (advisor_user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS auth_sessions (
+ token_hash VARCHAR(64) PRIMARY KEY,
+ user_id BIGINT NOT NULL,
+ expires_at TIMESTAMP NOT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS signin_logs (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL,
+ token_hash VARCHAR(64) NOT NULL UNIQUE,
+ signin_at TIMESTAMP NOT NULL,
+ signout_at TIMESTAMP NULL,
+ FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS books (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ code VARCHAR(7) NOT NULL UNIQUE,
+ legacy_code VARCHAR(32) UNIQUE,
+ title VARCHAR(500) NOT NULL,
+ author VARCHAR(500),
+ purchase_year INT NOT NULL,
+ publication_year INT,
+ location VARCHAR(200),
+ last_returned_at TIMESTAMP NULL,
+ source_json LONGTEXT
+);
+CREATE TABLE IF NOT EXISTS borrow_requests (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL,
+ book_id BIGINT NOT NULL,
+ status VARCHAR(24) NOT NULL DEFAULT 'pending',
+ requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ reviewed_by BIGINT,
+ reviewed_at TIMESTAMP NULL,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ FOREIGN KEY (book_id) REFERENCES books(id)
+);
+CREATE TABLE IF NOT EXISTS borrows (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL,
+ book_id BIGINT NOT NULL,
+ request_id BIGINT UNIQUE,
+ borrowed_at TIMESTAMP NOT NULL,
+ due_at TIMESTAMP NOT NULL,
+ returned_at TIMESTAMP NULL,
+ source_key VARCHAR(200) UNIQUE,
+ source_json LONGTEXT,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ FOREIGN KEY (book_id) REFERENCES books(id),
+ FOREIGN KEY (request_id) REFERENCES borrow_requests(id)
+);
+CREATE TABLE IF NOT EXISTS violations (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL,
+ borrow_id BIGINT NOT NULL UNIQUE,
+ status VARCHAR(24) NOT NULL DEFAULT 'pending',
+ confirmed_by BIGINT,
+ confirmed_at TIMESTAMP NULL,
+ reason VARCHAR(500) NOT NULL,
+ FOREIGN KEY (user_id) REFERENCES users(id),
+ FOREIGN KEY (borrow_id) REFERENCES borrows(id)
+);
+CREATE TABLE IF NOT EXISTS notifications (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ user_id BIGINT NOT NULL,
+ title VARCHAR(500) NOT NULL,
+ body LONGTEXT,
+ dedup_key VARCHAR(200) UNIQUE,
+ is_read BOOLEAN NOT NULL DEFAULT FALSE,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS library_config (
+ id INT PRIMARY KEY,
+ max_borrow INT NOT NULL,
+ loan_days INT NOT NULL,
+ remind_before_workdays INT NOT NULL
+);
+INSERT INTO library_config (id,max_borrow,loan_days,remind_before_workdays)
+ SELECT 1,2,30,3 WHERE NOT EXISTS (SELECT 1 FROM library_config WHERE id=1);
+CREATE TABLE IF NOT EXISTS theses (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, source_key VARCHAR(200) NOT NULL UNIQUE,
+ student_no VARCHAR(10), author VARCHAR(100), title VARCHAR(500) NOT NULL, source_json LONGTEXT
+);
+CREATE TABLE IF NOT EXISTS patents (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, source_key VARCHAR(200) NOT NULL UNIQUE,
+ title VARCHAR(500) NOT NULL, application_no VARCHAR(100), status VARCHAR(24), source_json LONGTEXT
+);
+CREATE TABLE IF NOT EXISTS projects (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, source_key VARCHAR(200) NOT NULL UNIQUE,
+ title VARCHAR(500) NOT NULL, leader VARCHAR(100), source_json LONGTEXT
+);
+CREATE TABLE IF NOT EXISTS courses (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, source_key VARCHAR(200) NOT NULL UNIQUE,
+ code VARCHAR(100), title VARCHAR(500) NOT NULL, teacher VARCHAR(100), source_json LONGTEXT
+);
+CREATE TABLE IF NOT EXISTS textbooks (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT, source_key VARCHAR(200) NOT NULL UNIQUE,
+ title VARCHAR(500) NOT NULL, author VARCHAR(500), isbn VARCHAR(100), source_json LONGTEXT
+);
+CREATE TABLE IF NOT EXISTS portal_content (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ content_type VARCHAR(32) NOT NULL,
+ category VARCHAR(32),
+ title VARCHAR(500) NOT NULL,
+ body LONGTEXT,
+ author VARCHAR(100),
+ published_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ data_json LONGTEXT NOT NULL,
+ source_key VARCHAR(200) UNIQUE,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS media_files (
+ id VARCHAR(36) PRIMARY KEY,
+ original_name VARCHAR(255) NOT NULL,
+ storage_name VARCHAR(100) NOT NULL UNIQUE,
+ content_type VARCHAR(100) NOT NULL,
+ size_bytes BIGINT NOT NULL,
+ is_public BOOLEAN NOT NULL DEFAULT TRUE,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS downloads (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ category VARCHAR(32) NOT NULL,
+ title VARCHAR(500) NOT NULL,
+ media_id VARCHAR(36),
+ sort_order INT NOT NULL DEFAULT 0,
+ FOREIGN KEY (media_id) REFERENCES media_files(id)
+);
+CREATE TABLE IF NOT EXISTS source_import_rows (
+ source_key VARCHAR(200) PRIMARY KEY,
+ kind VARCHAR(32) NOT NULL,
+ sheet_name VARCHAR(100) NOT NULL,
+ row_number INT NOT NULL,
+ raw_json LONGTEXT NOT NULL,
+ status VARCHAR(24) NOT NULL,
+ reason VARCHAR(1000),
+ imported_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
