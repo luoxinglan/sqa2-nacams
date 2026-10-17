@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { getPerson, mediaUrl } from '../api'
-import PageShell from '../components/PageShell.vue'
-import StateBlock from '../components/StateBlock.vue'
+import { getPerson, mediaUrl } from '@/api/portal'
+import PageShell from '@/components/PageShell.vue'
+import StateBlock from '@/components/StateBlock.vue'
 
 const props = defineProps({ kind: { type: String, required: true } }); const route = useRoute(); const person = ref(null); const loading = ref(true); const error = ref('')
 onMounted(async () => { try { person.value = await getPerson(props.kind, route.params.id) } catch (e) { error.value = e.message } finally { loading.value = false } })

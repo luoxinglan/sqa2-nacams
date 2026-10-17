@@ -5,7 +5,7 @@
     <section id="intro" class="portal-section">
       <h2 class="section-title">研究所简介</h2>
       <el-skeleton v-if="loading" :rows="4" animated />
-      <div v-else class="rich-text" v-html="about.intro"></div>
+      <div v-else class="rich-text" v-html="intro"></div>
     </section>
 
     <div class="sub-nav">
@@ -29,23 +29,30 @@
     <section id="contact" class="portal-section contact-section">
       <h2 class="section-title">联系我们</h2>
       <el-skeleton v-if="loading" :rows="3" animated />
-      <div v-else class="rich-text contact-text" v-html="about.contact"></div>
+      <div v-else class="rich-text contact-text" v-html="contact"></div>
     </section>
   </div>
 </template>
 
 <script setup>
-// 关于我们（刘罡甫）：简介/联系我们从 GET /about 取，管理员后台更新后前台即时反映
-import { onMounted, ref } from 'vue'
+// 关于我们（刘罡甫）：简介/联系我们从 GET /about 取（分页内容条目，category 区分），
+// 管理员后台更新后前台即时反映
+import { computed, onMounted, ref } from 'vue'
 import { User, Notebook, Location } from '@element-plus/icons-vue'
 import { getAbout } from '@/api/site'
 
-const about = ref({ intro: '', contact: '' })
+const items = ref([])
 const loading = ref(true)
+
+const intro = computed(() => items.value.find((it) => it.category === '研究所简介')?.body || '')
+const contact = computed(() => items.value.find((it) => it.category === '联系我们')?.body || '')
 
 onMounted(async () => {
   try {
-    about.value = await getAbout()
+    const data = await getAbout()
+    items.value = data.items || []
+  } catch {
+    items.value = []
   } finally {
     loading.value = false
   }
