@@ -1,10 +1,10 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { listPeople, mediaUrl } from '../api'
-import PageShell from '../components/PageShell.vue'
-import StateBlock from '../components/StateBlock.vue'
-import PaginationBar from '../components/PaginationBar.vue'
+import { listPeople, mediaUrl } from '@/api/portal'
+import PageShell from '@/components/PageShell.vue'
+import StateBlock from '@/components/StateBlock.vue'
+import PaginationBar from '@/components/PaginationBar.vue'
 
 const props = defineProps({ kind: { type: String, required: true } }); const teacher = props.kind === 'teachers'
 const filter = ref(teacher ? '全部' : '在读'); const year = ref(''); const keyword = ref('')

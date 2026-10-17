@@ -5,6 +5,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import 'element-plus/dist/index.css'
 import App from './App.vue'
 import router from './router'
+import './styles/portal.css' // 门户栏目页全局类（钟坤宇），先于主题引入
 import './styles/main.css'
 
 const app = createApp(App)

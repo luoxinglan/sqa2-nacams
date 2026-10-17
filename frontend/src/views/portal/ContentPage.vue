@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { listContent } from '../api'
-import PageShell from '../components/PageShell.vue'
-import StateBlock from '../components/StateBlock.vue'
-import PaginationBar from '../components/PaginationBar.vue'
+import { listContent } from '@/api/portal'
+import PageShell from '@/components/PageShell.vue'
+import StateBlock from '@/components/StateBlock.vue'
+import PaginationBar from '@/components/PaginationBar.vue'
 
 const props = defineProps({ mode: { type: String, required: true } })
 const config = {

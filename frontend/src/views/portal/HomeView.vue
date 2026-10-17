@@ -26,8 +26,8 @@
           <el-tooltip content="最新动态每分钟自动刷新，切换回本窗口时也会立即刷新" placement="top">
             <span class="live-hint"><el-icon><Refresh /></el-icon> 实时更新 · {{ lastRefresh || '加载中' }}</span>
           </el-tooltip>
-          <router-link v-if="summary && summary.noticeCount > 0" to="/news" class="notice-count">
-            <el-tag type="warning" effect="light" round>通知通告 {{ summary.noticeCount }} 条</el-tag>
+          <router-link v-if="summary && summary.notificationCount > 0" to="/news" class="notice-count">
+            <el-tag type="warning" effect="light" round>通知通告 {{ summary.notificationCount }} 条</el-tag>
           </router-link>
           <router-link to="/news" class="more-link">更多 &gt;&gt;</router-link>
         </div>
@@ -35,12 +35,12 @@
 
       <el-skeleton v-if="!summary" :rows="5" animated style="padding: 8px 0" />
       <ul v-else class="news-list" v-loading="refreshing">
-        <li v-for="item in summary.latestNews" :key="item.id">
+        <li v-for="item in summary.news" :key="item.id">
           <router-link :to="`/news/${item.id}`" class="news-item">
             <el-tag :type="CATEGORY_STYLE[item.category] || 'info'" size="small" effect="plain">{{ item.category }}</el-tag>
             <span class="news-title">{{ item.title }}</span>
             <span class="news-info">{{ item.author }}</span>
-            <span class="news-info">{{ item.publishTime }}</span>
+            <span class="news-info">{{ item.publishedAt }}</span>
           </router-link>
         </li>
       </ul>
@@ -113,7 +113,11 @@ let timer = null
 onMounted(() => {
   siteStore.load()
   loadSummary()
-  getAbout().then((d) => (introHtml.value = d.intro || '')).catch(() => {})
+  getAbout()
+    .then((d) => {
+      introHtml.value = (d.items || []).find((it) => it.category === '研究所简介')?.body || ''
+    })
+    .catch(() => {})
   timer = setInterval(loadSummary, REFRESH_INTERVAL)
   window.addEventListener('focus', onFocus)
 })
