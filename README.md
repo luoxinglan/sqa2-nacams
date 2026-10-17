@@ -20,7 +20,7 @@ sqa2-nacams/
 │   ├── 组员协作规约_SQA2_20261016.md  #   同步/提交/AI登记/红线全规约（组员与其 AI 必读）
 │   └── AI使用登记.md             #   凡用 AI 产出，必须在此追加一行后随代码提交
 ├── backend/                     # Spring Boot后端、schema、导入脚本和集成测试
-└── frontend/                    # Vue 3（由前端组员建立）
+└── frontend/                    # Vue 3 + Vite 门户前端（钟坤宇负责栏目）
 ```
 
 ## 协作规约（5 人 4 天，从简从严）
@@ -49,6 +49,8 @@ mvn -f backend/pom.xml spring-boot:run
 `backend/target/`、`runtime/`和`.local/`均为忽略的本地产物，禁止提交原始Excel、数据库文件与密码。
 
 韦政治部分的验证结果见[后端验收记录](docs/后端验收记录_SQA2_20261017.md)；后端设计和运行章节DOCX初稿位于`docs/交付文档/`，供陈彬统稿。完整图书业务、校验引擎及前端仍由对应成员接入。
+
+门户前端位于 `frontend/`，运行 `cd frontend; npm install; npm run dev` 启动。页面和接口说明见[前端运行说明](frontend/README.md)。
 
 ## 访问 GitHub 慢的成员
 
