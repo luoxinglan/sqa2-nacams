@@ -36,3 +36,9 @@ logs/
 # 操作系统
 Thumbs.db
 .DS_Store
+
+# 本地依赖缓存、独立测试数据库与运行数据
+.local/
+runtime/
+__pycache__/
+*.pyc
