@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS source_import_rows (
  source_key VARCHAR(200) PRIMARY KEY,
  kind VARCHAR(32) NOT NULL,
  sheet_name VARCHAR(100) NOT NULL,
- row_number INT NOT NULL,
+ source_row_no INT NOT NULL,
  raw_json LONGTEXT NOT NULL,
  status VARCHAR(24) NOT NULL,
  reason VARCHAR(1000),
