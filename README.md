@@ -7,7 +7,7 @@
 
 - 后端 `backend/`：Java 17 ＋ Spring Boot 3.x（Maven）＋ MyBatis-Plus ＋ MySQL 8（分包 auth/portal/library/admin/validation/backup）
 - 前端 `frontend/`：Vue 3 ＋ Vite ＋ Vue Router ＋ Pinia ＋ Element Plus ＋ Axios
-- 接口契约：`docs/接口规范_SQA2_20261016.md`（10-17 12:00 冻结 v1.0，以文档为仲裁）
+- 接口契约：`docs/接口规范_SQA2_20261016.md`（现为v1.0实现基线，待消费方确认冻结，以文档为仲裁）
 
 ## 目录
 
@@ -19,8 +19,8 @@ sqa2-nacams/
 │   ├── 接口规范_SQA2_20261016.md      #   前后端接口契约（10-17 12:00 冻结 v1.0）
 │   ├── 组员协作规约_SQA2_20261016.md  #   同步/提交/AI登记/红线全规约（组员与其 AI 必读）
 │   └── AI使用登记.md             #   凡用 AI 产出，必须在此追加一行后随代码提交
-├── backend/                     # Spring Boot（待搭骨架）
-└── frontend/                    # Vue 3（待搭骨架）
+├── backend/                     # Spring Boot后端、schema、导入脚本和集成测试
+└── frontend/                    # Vue 3（由前端组员建立）
 ```
 
 ## 协作规约（5 人 4 天，从简从严）
@@ -34,12 +34,21 @@ sqa2-nacams/
 5. **AI 使用登记**：用了任何 AI 工具（Copilot/Cursor/Claude/ChatGPT 等），当天在 `docs/AI使用登记.md` 追加一行再提交——这是课程硬要求，交付时要出声明。
 6. 敏感信息（数据库密码等）放 `application-local.yml`（已 gitignore），提交 `application-local.yml.example` 模板。
 
-## 快速开始（骨架生成后补充运行说明）
+## 快速开始
 
 ```bash
-# 后端（待补）
-# 前端（待补）
+# 需要JDK17+、Maven3.9和MySQL8。先创建数据库并配置本地连接与首次管理员密码。
+mvn -f backend/pom.xml test
+mvn -f backend/pom.xml spring-boot:run
+# 前端由三位前端组员按接口文档开发。
 ```
+
+完整配置、数据导入、API地址、备份恢复和陈彬模块接入说明见[后端运行说明](backend/README.md)。
+默认API地址为`http://localhost:8080/api/v1`；Swagger为`http://localhost:8080/swagger-ui.html`。
+首次启动须提供`BOOTSTRAP_PASSWORD`，或复制本地配置模板填写，系统没有默认弱口令。
+`backend/target/`、`runtime/`和`.local/`均为忽略的本地产物，禁止提交原始Excel、数据库文件与密码。
+
+韦政治部分的验证结果见[后端验收记录](docs/后端验收记录_SQA2_20261017.md)；后端设计和运行章节DOCX初稿位于`docs/交付文档/`，供陈彬统稿。完整图书业务、校验引擎及前端仍由对应成员接入。
 
 ## 访问 GitHub 慢的成员
 
