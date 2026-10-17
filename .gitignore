@@ -42,3 +42,7 @@ Thumbs.db
 runtime/
 __pycache__/
 *.pyc
+
+# Vite 环境文件（仅含开关与路径，无密钥，需提交；.env.local 仍被忽略）
+!.env.development
+!.env.production

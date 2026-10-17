@@ -1,0 +1,79 @@
+/* 全局样式与主题变量（三人共用；改主题先在群里说一声） */
+:root {
+  /* Element Plus 主色覆写：学术深蓝 */
+  --el-color-primary: #1b4e9b;
+  --el-color-primary-light-3: #4f74b4;
+  --el-color-primary-light-5: #8ba0c9;
+  --el-color-primary-light-7: #c0cbe2;
+  --el-color-primary-light-8: #d6ddef;
+  --el-color-primary-light-9: #ebf0f7;
+  --el-color-primary-dark-2: #163e7c;
+
+  --nacams-navy: #0c2a5e;
+  --nacams-blue: #1f5aa8;
+  --nacams-cyan: #2b9cc9;
+  --nacams-text: #1f2937;
+  --nacams-muted: #6b7280;
+  --nacams-bg: #f4f6f9;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  background: var(--nacams-bg);
+  color: var(--nacams-text);
+  font-size: 15px;
+}
+
+a {
+  color: var(--el-color-primary);
+  text-decoration: none;
+}
+
+/* 门户通用版式工具类 */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.portal-section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(12, 42, 94, 0.08);
+  padding: 28px 32px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--nacams-navy);
+  margin: 0 0 18px;
+}
+
+.section-title::before {
+  content: '';
+  width: 5px;
+  height: 20px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--nacams-blue), var(--nacams-cyan));
+}
+
+/* 富文本内容（研究所简介等后台可更新内容）容器 */
+.rich-text {
+  line-height: 1.9;
+  color: #374151;
+}
+
+.rich-text p {
+  margin: 0 0 12px;
+  text-indent: 2em;
+}
