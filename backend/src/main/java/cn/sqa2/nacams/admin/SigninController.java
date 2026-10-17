@@ -5,6 +5,7 @@ import cn.sqa2.nacams.common.*;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name="bearerAuth")
 @RestController
 @RequestMapping("/api/v1/stats")
 public class SigninController {
