@@ -5,6 +5,8 @@
     python verify_correctness.py --base-url http://127.0.0.1:8080 --sample 200 --output runtime/b01-correctness.json
 
 抽样量必须不少于 200 条，否则脚本拒绝出具结论并返回退出码 2。
+借阅清单接口仅图书管理教师可读；管理员账号不具该权限时，另设环境变量
+LIBRARIAN_PASSWORD（默认用户名 librarian）提供图书管理教师会话。
 仅依赖 Python 标准库。
 """
 import argparse
@@ -122,6 +124,7 @@ def main():
     parser.add_argument("--username", default="admin")
     parser.add_argument("--sample", type=int, default=REQUIRED_SAMPLE)
     parser.add_argument("--purchase-year", type=int, default=2026)
+    parser.add_argument("--librarian-username", default="librarian")
     parser.add_argument("--output", default="runtime/b01-correctness.json")
     args = parser.parse_args()
     if args.sample < REQUIRED_SAMPLE:
@@ -136,11 +139,20 @@ def main():
     token = api.call("POST", "/auth/login", {"username": args.username, "password": password})["token"]
     api.token = token
 
+    # 借阅清单接口仅图书管理教师可读；未单独提供其口令时沿用管理员会话。
+    librarian_password = os.environ.get("LIBRARIAN_PASSWORD")
+    borrow_api = api
+    if librarian_password:
+        borrow_api = Api(args.base_url)
+        borrow_api.token = borrow_api.call("POST", "/auth/login",
+                                           {"username": args.librarian_username,
+                                            "password": librarian_password})["token"]
+
     quota = max(1, args.sample // len(KINDS))
     records = {kind: source_rows(api, kind, quota) for kind in KINDS}
     users = api.pages("/admin/users")
     books = api.pages("/books")
-    borrows = api.pages("/admin/borrows")
+    borrows = borrow_api.pages("/admin/borrows")
 
     mismatches, checked, by_kind = [], 0, {}
     for kind in KINDS:
