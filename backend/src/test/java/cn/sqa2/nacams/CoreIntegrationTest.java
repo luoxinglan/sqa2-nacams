@@ -168,4 +168,45 @@ class CoreIntegrationTest {
         mvc.perform(with(multipart("/api/v1/admin/import/baseline").file(file).param("kind","borrows").param("demoDate","2026-10-17"),admin)).andExpect(jsonPath("$.data.success").value(1));
         assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM borrows WHERE returned_at IS NOT NULL AND borrowed_at>=?",Long.class,java.sql.Timestamp.valueOf("2026-01-01 00:00:00"))).isEqualTo(1);
     }
+
+    @Test void nameRuleIsConsistentAcrossSavePrecheckAndImport()throws Exception{
+        var bad=teacher("bad-name","6120100001");bad.put("name","张三2");
+        mvc.perform(with(post("/api/v1/admin/users"),admin).contentType("application/json").content(json.writeValueAsBytes(bad)))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.data.fields.name").value(org.hamcrest.Matchers.containsString("姓名须为汉字")));
+        var precheck=Map.of("type","teacher","fields",Map.of("name","张三2","teacherType","full","employeeNo","6120100001"));
+        mvc.perform(with(post("/api/v1/validate"),admin).contentType("application/json").content(json.writeValueAsBytes(precheck)))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.data.fields.name").value(org.hamcrest.Matchers.containsString("姓名须为汉字")));
+        String csv="username,password,identityType,name,studentNo,status\n"
+                +"bad,Test-Admin-2026,student,张三2,3120260001,在读\n"
+                +"good,Test-Admin-2026,student,张三,3120260002,在读\n";
+        var file=new MockMultipartFile("file","users.csv","text/csv",csv.getBytes(StandardCharsets.UTF_8));
+        mvc.perform(with(multipart("/api/v1/admin/users/import").file(file),admin))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.success").value(1)).andExpect(jsonPath("$.data.failed").value(1));
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE username='bad'",Long.class)).isZero();
+        var p=teacher("changer","6120100001");p.put("name","张三");
+        long id=Db.id(users.save(null,p).get("id"));
+        mvc.perform(with(put("/api/v1/admin/users/"+id),admin).contentType("application/json").content("{\"name\":\"张三2\"}"))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.data.fields.name").exists());
+        assertThat(db.one("SELECT name FROM users WHERE id=?",id).get("name")).isEqualTo("张三");
+    }
+
+    @Test void baselineStudentImportSupportsNameExemptAndKeepsNameVerbatim()throws Exception{
+        users.save(null,student("existing","3120260001"));
+        byte[] data;
+        try(var w=new XSSFWorkbook();var out=new ByteArrayOutputStream()){
+            var s=w.createSheet("在读学生");
+            String[] heads={"年级","学号","姓名","姓名豁免","导师","类别"};
+            var h=s.createRow(0);for(int i=0;i<heads.length;i++)h.createCell(i).setCellValue(heads[i]);
+            var a=s.createRow(1);a.createCell(0).setCellValue(2026);a.createCell(1).setCellValue("3820260001");a.createCell(2).setCellValue("John Smith");a.createCell(3).setCellValue("是");a.createCell(4).setCellValue("外部导师");a.createCell(5).setCellValue("学术硕士");
+            var b=s.createRow(2);b.createCell(0).setCellValue(2026);b.createCell(1).setCellValue("3120260003");b.createCell(2).setCellValue(" 张三 ");b.createCell(3).setCellValue("");b.createCell(4).setCellValue("外部导师");b.createCell(5).setCellValue("学术硕士");
+            var c=s.createRow(3);c.createCell(0).setCellValue(2026);c.createCell(1).setCellValue("3120260004");c.createCell(2).setCellValue("李四");c.createCell(3).setCellValue("");c.createCell(4).setCellValue("外部导师");c.createCell(5).setCellValue("学术硕士");
+            w.write(out);data=out.toByteArray();
+        }
+        var file=new MockMultipartFile("file","students.xlsx","application/octet-stream",data);
+        mvc.perform(with(multipart("/api/v1/admin/import/baseline").file(file).param("kind","students").param("initialPassword","Test-Admin-2026"),admin))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.success").value(2)).andExpect(jsonPath("$.data.failed").value(1));
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE username='3820260001' AND profile_json LIKE '%\"nameExempt\":true%'",Long.class)).isEqualTo(1);
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE name LIKE ' %' OR name LIKE '% '",Long.class)).isZero();
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE username='3120260003'",Long.class)).isZero();
+    }
 }

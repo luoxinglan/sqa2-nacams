@@ -20,7 +20,7 @@ public class TabularReader {
             if(name.endsWith(".csv")){
                 String text=new String(file.getBytes(),StandardCharsets.UTF_8);if(text.startsWith("\uFEFF"))text=text.substring(1);
                 try(var parser=CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setIgnoreEmptyLines(true).get().parse(new StringReader(text))){
-                    for(CSVRecord record:parser){var p=new LinkedHashMap<String,Object>();record.toMap().forEach((k,v)->{if(!k.isBlank())p.put(k.trim(),v.trim());});
+                    for(CSVRecord record:parser){var p=new LinkedHashMap<String,Object>();record.toMap().forEach((k,v)->{if(!k.isBlank()){String header=k.trim();p.put(header,isNameColumn(header)?v:v.trim());}});
                         result.add(new Row("CSV",(int)record.getRecordNumber()+1,p));if(result.size()>10000)throw new ApiException(422,"每次导入最多10000行");}
                 }
             }else if(name.endsWith(".xlsx")){
@@ -38,7 +38,7 @@ public class TabularReader {
                                 if(cell!=null && cellType==CellType.NUMERIC){
                                     if(DateUtil.isCellDateFormatted(cell))value=cell.getLocalDateTimeCellValue().toLocalDate().format(DateTimeFormatter.ISO_DATE);
                                     else value=java.math.BigDecimal.valueOf(cell.getNumericCellValue()).stripTrailingZeros().toPlainString();
-                                }else if(cell!=null && cellType==CellType.STRING)value=cell.getStringCellValue().trim();
+                                }else if(cell!=null && cellType==CellType.STRING)value=isNameColumn(h.getValue())?cell.getStringCellValue():cell.getStringCellValue().trim();
                                 else if(cell!=null && cellType==CellType.BOOLEAN)value=Boolean.toString(cell.getBooleanCellValue());
                                 p.put(h.getValue(),value);
                             }
@@ -51,6 +51,8 @@ public class TabularReader {
         }catch(ApiException e){throw e;}catch(Exception e){throw new ApiException(422,"无法读取表格，请检查格式、表头与编码");}
         if(result.isEmpty())throw new ApiException(422,"文件没有数据行");return result;
     }
+    /** 姓名列保留单元格原文（首尾空白不被静默去除），由校验层拒绝而不是改写。 */
+    private static boolean isNameColumn(String header){return "姓名".equals(header)||"name".equalsIgnoreCase(header);}
     private record RowHeader(int index,Map<Integer,String> names){}
     private RowHeader header(Sheet sheet,DataFormatter format){
         for(var row:sheet){var headers=new LinkedHashMap<Integer,String>();var seen=new HashSet<String>();

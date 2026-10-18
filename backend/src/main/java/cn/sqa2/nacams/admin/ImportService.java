@@ -18,7 +18,7 @@ public class ImportService {
     public ImportService(Db db,Json json,UserService users,TabularReader reader,ContentService content,PlatformTransactionManager manager){
         this.db=db;this.json=json;this.users=users;this.reader=reader;this.content=content;tx=new TransactionTemplate(manager);
     }
-    public Map<String,Object> users(MultipartFile file){return process(reader.read(file),row->users.save(null,row.values()));}
+    public Map<String,Object> users(MultipartFile file){return process(reader.read(file),row->{var values=new LinkedHashMap<String,Object>(row.values());normalizeNameExempt(values);return users.save(null,values);});}
     public Map<String,Object> content(String type,MultipartFile file){content.checkType(type);return process(reader.read(file),row->content.save(type,null,row.values()));}
     private Map<String,Object> process(List<TabularReader.Row> rows,java.util.function.Function<TabularReader.Row,Object> operation){
         var results=new ArrayList<Map<String,Object>>();int success=0;
@@ -49,19 +49,36 @@ public class ImportService {
         if(updated==0)db.jdbc.update("INSERT INTO source_import_rows(source_key,kind,sheet_name,source_row_no,raw_json,status,reason) VALUES(?,?,?,?,?,?,?)",key,kind,row.sheet(),row.number(),raw,status,reason);
     }
     private String val(Map<String,Object> p,String key){return Db.str(p,key);}
+    /** 通用导入：把"是/否/1/0/yes/no/true/false"归一化为布尔，空值移除该键，其他值整行拒绝。 */
+    private void normalizeNameExempt(Map<String,Object> p){
+        if(!p.containsKey("nameExempt"))return;
+        Object raw=p.get("nameExempt");String value=raw==null?"":raw.toString().trim();
+        if(value.isEmpty()){p.remove("nameExempt");return;}
+        p.put("nameExempt",parseNameExempt(value));
+    }
+    /** 基础数据导入的"姓名豁免"列取值，非法值抛 422 由行级事务隔离。 */
+    private Boolean parseNameExempt(String value){
+        String v=value.trim().toLowerCase(Locale.ROOT);
+        if(Set.of("true","是","1","yes","y").contains(v))return Boolean.TRUE;
+        if(Set.of("false","否","0","no","n").contains(v))return Boolean.FALSE;
+        throw new ApiException(422,"姓名豁免列仅支持是/否");
+    }
     private void importRow(String kind,TabularReader.Row row,String key,int year,String password,LocalDate date){
         var p=row.values();String raw=json.write(p),title="";
         switch(kind){
             case "teachers","students"->{
                 boolean teacher=kind.equals("teachers");var profile=new LinkedHashMap<String,Object>();
                 String number=val(p,teacher?"工号":"学号");profile.put("username",number);profile.put("password",password);
-                profile.put("identityType",teacher?"teacher":"student");profile.put("name",val(p,"姓名"));
+                // 姓名保留单元格原文：首尾空白由校验层拒绝，不做静默 trim/改写。
+                profile.put("identityType",teacher?"teacher":"student");profile.put("name",Objects.toString(p.get("姓名"),""));
                 if(teacher){profile.put("employeeNo",number);profile.put("teacherType","full");profile.put("title",val(p,"职称"));
                     profile.put("supervisorQualification",val(p,"导师资格"));profile.put("position",val(p,"研究所职务"));profile.put("unit",val(p,"学院"));
                     profile.put("socialPositions",val(p,"社会兼职"));profile.put("collegePosition",val(p,"学院行政职务"));profile.put("collegeAcademicPosition",val(p,"学院学术职务"));
                 }else{profile.put("studentNo",number);profile.put("status",row.sheet().contains("在读")?"在读":row.sheet().contains("结业")?"结业肄业":"毕业");
                     profile.put("enrollmentYear",Integer.parseInt(val(p,"年级")));profile.put("advisor",val(p,"导师"));
-                    profile.put("enrollmentDate",val(p,"入学时间"));profile.put("graduationDate",val(p,"毕业时间"));profile.put("category",val(p,"类别"));}
+                    profile.put("enrollmentDate",val(p,"入学时间"));profile.put("graduationDate",val(p,"毕业时间"));profile.put("category",val(p,"类别"));
+                    String exempt=val(p,"姓名豁免");if(exempt.isEmpty())exempt=val(p,"nameExempt");
+                    if(!exempt.isEmpty())profile.put("nameExempt",parseNameExempt(exempt));}
                 profile.put("gender",val(p,"性别"));profile.put("remark",val(p,"备注"));
                 // 缺失字段保留缺失，不把虚构电话/生日混入老师原始数据。
                 var existing=db.jdbc.queryForList("SELECT id FROM users WHERE username=?",number);

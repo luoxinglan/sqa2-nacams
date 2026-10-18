@@ -35,8 +35,10 @@ app:
     scan-cron: ${LIBRARY_SCAN_CRON:0 30 1 * * *}
     holidays: ${LIBRARY_HOLIDAYS:}
   validation:
+    # B-04 姓名长度：条例第十四条规定 2～6 个汉字（第四十条"以上/以下"含本数）。
+    # 代码内已固化法定区间并钳制，这里只能收紧、不能放宽；设为 15 等宽值会被忽略并告警。
     name-min-length: ${NAME_MIN_LENGTH:2}
-    name-max-length: ${NAME_MAX_LENGTH:15}
+    name-max-length: ${NAME_MAX_LENGTH:6}
   site:
     name: 网络攻防对抗技术研究所
     english-name: ${SITE_ENGLISH_NAME:}
