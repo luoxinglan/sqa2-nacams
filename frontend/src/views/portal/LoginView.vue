@@ -12,10 +12,10 @@
 
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top" size="large" @keyup.enter="submit">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" placeholder="请输入用户名" :prefix-icon="User" autocomplete="username" />
+          <el-input v-model="form.username" aria-label="用户名" placeholder="请输入用户名" :prefix-icon="User" autocomplete="username" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password autocomplete="current-password" />
+          <el-input v-model="form.password" aria-label="密码" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password autocomplete="current-password" />
         </el-form-item>
         <el-alert v-if="serverError" :title="serverError" type="error" show-icon :closable="false" style="margin-bottom: 16px" />
         <el-button type="primary" class="login-btn" :loading="submitting" @click="submit">
@@ -24,7 +24,7 @@
       </el-form>
 
       <p class="login-tip">账号由系统管理员统一创建与发放；登录即视为签到，登出即视为签出。</p>
-      <p class="login-demo">
+      <p v-if="isMock" class="login-demo">
         演示账号：admin / Admin@123（管理员）· director · librarian · teacher · student（密码 Bit@123456）
       </p>
     </div>
@@ -34,18 +34,20 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 import { useSiteStore } from '@/stores/site'
 import { useAuthStore } from '@/stores/auth'
+import { safeRedirect } from '@/utils/internal'
 
 const route = useRoute()
 const router = useRouter()
 const siteStore = useSiteStore()
-const site = siteStore.site // 登录页无门户布局，直接取（未加载时为兜底配置）
+const site = computed(() => siteStore.site)
 const auth = useAuthStore()
+const isMock = import.meta.env.VITE_USE_MOCK === '1'
 
 const formRef = ref()
 const submitting = ref(false)
@@ -59,13 +61,13 @@ const rules = {
 onMounted(() => siteStore.load())
 
 async function submit() {
-  await formRef.value.validate()
+  if (submitting.value || !await formRef.value.validate().catch(() => false)) return
   submitting.value = true
   serverError.value = ''
   try {
     await auth.login(form.username, form.password)
     ElMessage.success('登录成功，已自动签到')
-    router.push(String(route.query.redirect || '/'))
+    router.push(safeRedirect(route.query.redirect))
   } catch (e) {
     // 网络级错误已由请求层统一弹提示；此处兜底 422 字段错误
     if (e.fields && Object.keys(e.fields).length) {

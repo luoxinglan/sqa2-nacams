@@ -20,7 +20,7 @@ sqa2-nacams/
 │   ├── 组员协作规约_SQA2_20261016.md  #   同步/提交/AI登记/红线全规约（组员与其 AI 必读）
 │   └── AI使用登记.md             #   凡用 AI 产出，必须在此追加一行后随代码提交
 ├── backend/                     # Spring Boot后端、schema、导入脚本和集成测试
-└── frontend/                    # Vue 3 + Vite 门户前端（钟坤宇负责栏目）
+└── frontend/                    # Vue 3 + Vite 门户及内部工作台（三位前端成员分工）
 ```
 
 ## 协作规约（5 人 4 天，从简从严）
@@ -40,7 +40,7 @@ sqa2-nacams/
 # 需要JDK17+、Maven3.9和MySQL8。先创建数据库并配置本地连接与首次管理员密码。
 mvn -f backend/pom.xml test
 mvn -f backend/pom.xml spring-boot:run
-# 前端由三位前端组员按接口文档开发。
+# 前端：cd frontend 后执行 npm ci、npm run dev；默认连接真实后端。
 ```
 
 完整配置、数据导入、API地址、备份恢复和陈彬模块接入说明见[后端运行说明](backend/README.md)。
@@ -51,6 +51,8 @@ mvn -f backend/pom.xml spring-boot:run
 韦政治部分的验证结果见[后端验收记录](docs/后端验收记录_SQA2_20261017.md)；后端设计和运行章节DOCX初稿位于`docs/交付文档/`，供陈彬统稿。完整图书业务、校验引擎及前端仍由对应成员接入。
 
 门户前端位于 `frontend/`，运行 `cd frontend; npm install; npm run dev` 启动。页面和接口说明见[前端运行说明](frontend/README.md)。
+
+杨峥的注册用户端及管理员端已落位 `/me`、`/admin`，含图书管理教师专用操作。交付章节和复现命令见[内部端交付与验证记录](docs/内部端交付与验证记录_SQA2_杨峥_20261018.md)。
 
 ## 访问 GitHub 慢的成员
 

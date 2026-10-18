@@ -19,6 +19,7 @@
           <el-menu-item index="achievements" route="/achievements">研究成果</el-menu-item>
           <el-menu-item index="admissions" route="/admissions">招生信息</el-menu-item>
           <el-menu-item index="cooperations" route="/cooperations">国际合作</el-menu-item>
+          <el-sub-menu v-if="auth.isLoggedIn" index="internal"><template #title>内部服务</template><el-menu-item index="me" route="/me">内部管理</el-menu-item><el-menu-item index="downloads" route="/me/downloads">下载专区</el-menu-item><el-menu-item index="help" route="/me/help">用户帮助</el-menu-item></el-sub-menu>
         </el-menu>
 
         <div class="auth-area">
@@ -87,8 +88,7 @@ const activeNav = computed(() => route.meta.nav || 'home')
 
 async function onUserCommand(cmd) {
   if (cmd === 'logout') {
-    await auth.logout() // 登出即自动签出（A-03）
-    router.push('/')
+    try { await auth.logout(); router.push('/') } catch { /* 请求层提示失败，保留会话供重试 */ }
   } else if (cmd === 'me') {
     router.push('/me')
   } else if (cmd === 'admin') {
@@ -219,5 +219,15 @@ async function onUserCommand(cmd) {
 
 .footer-addr {
   opacity: 0.75;
+}
+
+@media (max-width: 1280px) {
+  .header-inner { height: auto; min-height: 72px; flex-wrap: wrap; gap: 12px; padding-top: 12px; padding-bottom: 12px; }
+  .portal-menu { order: 3; flex: 0 0 100%; justify-content: flex-start; overflow-x: auto; }
+  .auth-area { margin-left: auto; }
+}
+@media (max-width: 600px) {
+  .brand-zh { font-size: 16px; letter-spacing: 0; }
+  .brand-en { max-width: 260px; font-size: 10px; }
 }
 </style>

@@ -23,24 +23,38 @@ export const useAuthStore = defineStore('auth', {
     isLibrarian: (s) => Boolean(s.user?.isLibrarian),
   },
   actions: {
+    setUser(user) {
+      this.user = user
+      // 电话、生日等完整档案仅在内存中使用，不落地浏览器缓存。
+      const { id, username, name, role, identityType, teacherType, isDirector, isLibrarian } = user
+      localStorage.setItem(USER_KEY, JSON.stringify({ id, username, name, role, identityType, teacherType, isDirector, isLibrarian }))
+    },
+    clearSession() {
+      this.token = ''
+      this.user = null
+      localStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(USER_KEY)
+    },
+    async refresh() {
+      const user = await authApi.getMe()
+      this.setUser(user)
+      return user
+    },
     async login(username, password) {
       const data = await authApi.login({ username, password })
       this.token = data.token
-      this.user = data.user
       localStorage.setItem(TOKEN_KEY, this.token)
-      localStorage.setItem(USER_KEY, JSON.stringify(this.user))
+      this.setUser(data.user)
       return data.user
     },
     async logout() {
       try {
         await authApi.logout() // 登出=签出，后端记录登出时间
-      } catch {
-        // 后端不可达也清本地登录态，避免卡死
+      } catch (e) {
+        // 仅已失效令牌可直接清理；网络失败时保留会话，允许用户重试签出。
+        if (e.code !== 401) throw e
       }
-      this.token = ''
-      this.user = null
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USER_KEY)
+      this.clearSession()
     },
   },
 })

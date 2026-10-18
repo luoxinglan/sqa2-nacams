@@ -45,12 +45,16 @@ function fail(body) {
 
 instance.interceptors.response.use(
   (resp) => {
+    if (resp.config.responseType === 'blob') return resp
     const body = resp.data
     if (body && typeof body === 'object' && body.code === 0) return body.data
     return Promise.reject(fail(body))
   },
-  (err) => {
-    const body = err.response?.data
+  async (err) => {
+    let body = err.response?.data
+    if (body instanceof Blob) {
+      try { body = JSON.parse(await body.text()) } catch { body = null }
+    }
     if (body && typeof body === 'object' && 'code' in body) return Promise.reject(fail(body))
     return Promise.reject(fail({ code: err.response?.status || -1, message: '网络异常或服务器无响应' }))
   }
@@ -60,7 +64,7 @@ instance.interceptors.response.use(
 // 命中 mock 的请求不发网络；未命中的照常走真实后端。联调时把 .env.development 的
 // VITE_USE_MOCK 改为 0 并重启 dev server。
 export async function request(method, url, data, config = {}) {
-  if (import.meta.env.VITE_USE_MOCK === '1') {
+  if (import.meta.env.VITE_USE_MOCK === '1' && config.responseType !== 'blob') {
     const mocked = mockRequest(method, url, { params: config.params, data })
     if (mocked) {
       await new Promise((r) => setTimeout(r, 120)) // 模拟网络延迟，避免界面假"零延迟"

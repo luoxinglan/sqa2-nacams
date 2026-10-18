@@ -1,0 +1,355 @@
+.work-app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+}
+.work-sidebar {
+  background: #102c52;
+  color: #d7e2f3;
+  padding: 25px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+.work-brand {
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 20px;
+  border-bottom: 1px solid #ffffff25;
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 600;
+}
+.work-brand img {
+  width: 36px;
+  height: 36px;
+}
+.work-brand small {
+  font-size: 11px;
+  font-weight: 400;
+  display: block;
+  color: #b5c6e0;
+}
+.work-nav-caption {
+  margin: 0 12px 8px;
+  font-size: 12px;
+  color: #9db4d4;
+}
+.work-nav {
+  display: grid;
+  gap: 4px;
+}
+.work-nav a {
+  padding: 10px 13px;
+  border-radius: 7px;
+  color: #d7e2f3;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+.work-nav a:hover {
+  background: #ffffff12;
+}
+.work-nav a.router-link-exact-active {
+  background: #285c9f;
+  color: white;
+}
+.work-side-bottom {
+  margin-top: auto;
+  padding: 18px 12px 0;
+  border-top: 1px solid #ffffff25;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #b5c6e0;
+}
+.work-main {
+  min-width: 0;
+}
+.work-topbar {
+  min-height: 65px;
+  padding: 10px 32px;
+  background: white;
+  border-bottom: 1px solid #e1e6ee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+}
+.work-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.work-main-content {
+  padding: 30px 32px 50px;
+  max-width: 1480px;
+  margin: auto;
+}
+.work-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.work-eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #5c7294;
+  letter-spacing: 2px;
+}
+.work-page h1 {
+  margin: 0;
+  font-size: 27px;
+  color: #102c52;
+  font-weight: 650;
+}
+.work-page h2 {
+  font-size: 18px;
+  color: #19385e;
+  margin: 0 0 18px;
+}
+.work-muted {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 8px 0;
+}
+.work-card {
+  background: white;
+  border: 1px solid #e1e7ef;
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.work-grid .work-card {
+  margin-bottom: 0;
+}
+.work-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.work-metric {
+  padding: 22px;
+  border: 1px solid #dfe6ef;
+  border-radius: 9px;
+  background: white;
+}
+.work-metric strong {
+  display: block;
+  font-size: 30px;
+  color: #193f72;
+  margin: 8px 0;
+}
+.work-metric span {
+  color: #64748b;
+  font-size: 13px;
+}
+.work-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.work-toolbar .el-input {
+  width: min(320px, 100%);
+}
+.work-toolbar .el-select {
+  width: 170px;
+}
+.work-table {
+  overflow-x: auto;
+}
+.work-pagination {
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.work-alert {
+  margin-bottom: 18px;
+}
+.work-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 22px;
+}
+.work-form-grid .el-select,
+.work-form-grid .el-date-editor,
+.work-form-grid .el-input-number {
+  width: 100%;
+}
+.work-form-grid .work-wide {
+  grid-column: 1/-1;
+}
+.work-form-message {
+  color: #b42318;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  margin: 12px 0;
+}
+.work-file {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px;
+  border: 1px dashed #a7b7ce;
+  border-radius: 7px;
+  margin: 18px 0;
+  background: #f8fafc;
+}
+.work-file input {
+  max-width: 100%;
+}
+.work-prose {
+  white-space: pre-wrap;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.work-help-index {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 24px;
+}
+.work-help-index nav {
+  border-right: 1px solid #e1e7ef;
+  padding-right: 20px;
+}
+.work-help-index nav button {
+  display: block;
+  border: 0;
+  background: transparent;
+  color: #1b4e9b;
+  text-align: left;
+  padding: 9px 0;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.work-quicklinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.work-quicklinks a {
+  padding: 12px 16px;
+  background: #eef3fb;
+  border-radius: 7px;
+}
+.work-photo {
+  width: 110px;
+  max-height: 160px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.work-notice {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid #e7ecf2;
+}
+.work-notice:first-child {
+  padding-top: 0;
+}
+.work-notice:last-child {
+  border-bottom: 0;
+}
+.work-notice h2 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.work-mobile-title {
+  font-size: 14px;
+  color: #405675;
+}
+@media (max-width: 1000px) {
+  .work-app {
+    grid-template-columns: 195px minmax(0, 1fr);
+  }
+  .work-topbar {
+    padding: 12px 20px;
+  }
+  .work-main-content {
+    padding: 24px 20px;
+  }
+  .work-form-grid {
+    gap: 0 16px;
+  }
+}
+@media (max-width: 720px) {
+  .work-app {
+    display: block;
+  }
+  .work-sidebar {
+    padding: 16px;
+    gap: 16px;
+  }
+  .work-brand {
+    padding-bottom: 12px;
+  }
+  .work-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .work-nav a {
+    padding: 8px 10px;
+  }
+  .work-nav-caption,
+  .work-side-bottom {
+    display: none;
+  }
+  .work-topbar {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .work-main-content {
+    padding: 22px 14px;
+  }
+  .work-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .work-page h1 {
+    font-size: 24px;
+  }
+  .work-card {
+    padding: 18px 14px;
+  }
+  .work-grid,
+  .work-form-grid,
+  .work-help-index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .work-metrics {
+    gap: 8px;
+  }
+  .work-metric {
+    padding: 13px 10px;
+  }
+  .work-metric strong {
+    font-size: 25px;
+  }
+  .work-help-index nav {
+    border-right: 0;
+    border-bottom: 1px solid #e1e7ef;
+    padding-bottom: 15px;
+  }
+  .work-pagination {
+    justify-content: center;
+  }
+  .work-notice {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
