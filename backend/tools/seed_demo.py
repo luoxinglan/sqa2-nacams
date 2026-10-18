@@ -53,9 +53,9 @@ BOOKS = [
     ("2026008", "深度学习安全与实践", "郑军", "研究所文件柜C-03", 2025),
 ]
 DEMO_USERS = [
-    ("director", "Director@123", "teacher", "闫所长", {"isDirector": True, "employeeNo": "6120900001", "teacherType": "full"}),
-    ("librarian", "Librarian@123", "teacher", "图书管理教师", {"isLibrarian": True, "employeeNo": "6120900002", "teacherType": "full"}),
-    ("teacher", "Teacher@123", "teacher", "示例教师", {"employeeNo": "6120900003", "teacherType": "full"}),
+    ("director", "Director@123", "teacher", "闫所长", {"isDirector": True, "employeeNo": "6120100001", "teacherType": "full"}),
+    ("librarian", "Librarian@123", "teacher", "图书管理教师", {"isLibrarian": True, "employeeNo": "6120100002", "teacherType": "full"}),
+    ("teacher", "Teacher@123", "teacher", "示例教师", {"employeeNo": "6120100003", "teacherType": "full"}),
     ("student", "Student@123", "student", "示例学生", {"studentNo": "3120260001", "status": "在读", "enrollmentYear": 2026}),
 ]
 
@@ -80,7 +80,7 @@ def main():
     admin_password = os.environ.get("ADMIN_PASSWORD")
     if not admin_password:
         sys.exit("请经环境变量 ADMIN_PASSWORD 提供管理员密码")
-    login = call(args.base, "POST", "/auth/login", payload={"username": "admin", "password": admin_password})
+    login = call(args.base_url, "POST", "/auth/login", payload={"username": "admin", "password": admin_password})
     if login.get("code") != 0:
         sys.exit("管理员登录失败：" + str(login.get("message")))
     token = login["data"]["token"]
@@ -89,34 +89,34 @@ def main():
     for username, password, identity, name, extra in DEMO_USERS:
         payload = {"username": username, "password": password, "identityType": identity, "name": name}
         payload.update(extra)
-        r = call(args.base, "POST", "/admin/users", token, payload)
+        r = call(args.base_url, "POST", "/admin/users", token, payload)
         print(("OK  " if r.get("code") == 0 else "SKIP ") + "用户 " + username + " " + str(r.get("message", ""))[:30])
 
     # 2) 图书（librarian 身份）
-    lib = call(args.base, "POST", "/auth/login", payload={"username": "librarian", "password": "Librarian@123"})
+    lib = call(args.base_url, "POST", "/auth/login", payload={"username": "librarian", "password": "Librarian@123"})
     lib_token = lib["data"]["token"] if lib.get("code") == 0 else token
     for code, title, author, location, year in BOOKS:
-        r = call(args.base, "POST", "/admin/books", lib_token,
+        r = call(args.base_url, "POST", "/admin/books", lib_token,
                  {"code": code, "title": title, "author": author, "location": location, "publicationYear": year})
         print(("OK  " if r.get("code") == 0 else "SKIP ") + "图书 " + code + " " + title)
 
     # 3) 门户内容（admin 身份）
     for category, title, author, at, body in NEWS:
-        r = call(args.base, "POST", "/admin/content/news", token,
+        r = call(args.base_url, "POST", "/admin/content/news", token,
                  {"category": category, "title": title, "author": author, "publishedAt": at, "body": body})
         print(("OK  " if r.get("code") == 0 else "SKIP ") + "动态 " + title[:18])
     for category, body in ABOUT:
-        r = call(args.base, "POST", "/admin/content/about", token,
+        r = call(args.base_url, "POST", "/admin/content/about", token,
                  {"category": category, "title": category, "body": body, "author": "综合办公室",
                   "publishedAt": "2026-10-01 09:00"})
         print(("OK  " if r.get("code") == 0 else "SKIP ") + "关于 " + category)
     for category, title, body in ADMISSIONS:
-        r = call(args.base, "POST", "/admin/content/admissions", token,
+        r = call(args.base_url, "POST", "/admin/content/admissions", token,
                  {"category": category, "title": title, "body": body, "author": "研究生秘书",
                   "publishedAt": "2026-09-10 08:00"})
         print(("OK  " if r.get("code") == 0 else "SKIP ") + "招生 " + category)
     for name, country, project in COOPS:
-        r = call(args.base, "POST", "/admin/content/cooperations", token,
+        r = call(args.base_url, "POST", "/admin/content/cooperations", token,
                  {"category": "国际合作", "title": name, "body": project, "country": country,
                   "author": "", "publishedAt": "2026-05-01 08:00"})
         print(("OK  " if r.get("code") == 0 else "SKIP ") + "合作 " + name)
