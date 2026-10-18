@@ -5,7 +5,7 @@
 ## 首次运行
 
 1. 安装JDK 17或21、Maven 3.9、MySQL 8。执行`java -version`和`mvn -version`，两者均须使用JDK 17以上。Windows默认Java 8时，在当前终端设置`$env:JAVA_HOME='你的JDK17目录'`和`$env:Path="$env:JAVA_HOME/bin;$env:Path"`。
-2. 用MySQL管理工具创建专用数据库`CREATE DATABASE sqa2_nacams CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`，为专用数据库用户授予该库的SELECT/INSERT/UPDATE/DELETE/CREATE权限；勿连接现有其他项目库。
+2. 用MySQL管理工具创建专用数据库`CREATE DATABASE sqa2_nacams CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`，为专用数据库用户授予该库的SELECT/INSERT/UPDATE/DELETE/CREATE/**REFERENCES/INDEX/ALTER**权限（`schema.sql`建表带外键，仅有CREATE会报`REFERENCES command denied`——2026-10-18联调实测）；勿连接现有其他项目库。示例：`CREATE USER 'sqa2'@'localhost' IDENTIFIED BY '<密码>'; GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,REFERENCES,INDEX,ALTER ON sqa2_nacams.* TO 'sqa2'@'localhost';`
 3. 在`backend/src/main/resources/`中把`application-local.yml.example`复制为`application-local.yml`，填写连接与首次管理员密码。也可使用环境变量`DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、`BOOTSTRAP_PASSWORD`。首次启动未提供有效初始管理员密码会拒绝启动。默认用户名admin，无默认密码。
 4. 在仓库根执行`mvn -f backend/pom.xml spring-boot:run`。首次启动自动执行`schema.sql`创建缺失表，重启不删除数据。默认端口8080，可用`PORT`覆盖。
 5. Swagger为`http://localhost:8080/swagger-ui.html`，机器可读接口为`http://localhost:8080/v3/api-docs`。公开站点信息为`GET http://localhost:8080/api/v1/site/info`。
