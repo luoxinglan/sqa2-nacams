@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS borrow_requests (
  requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  reviewed_by BIGINT,
  reviewed_at TIMESTAMP NULL,
+ review_note VARCHAR(500),
  FOREIGN KEY (user_id) REFERENCES users(id),
  FOREIGN KEY (book_id) REFERENCES books(id)
 );
@@ -83,6 +84,7 @@ CREATE TABLE IF NOT EXISTS borrows (
  borrowed_at TIMESTAMP NOT NULL,
  due_at TIMESTAMP NOT NULL,
  returned_at TIMESTAMP NULL,
+ returned_by BIGINT,
  source_key VARCHAR(200) UNIQUE,
  source_json LONGTEXT,
  FOREIGN KEY (user_id) REFERENCES users(id),
@@ -166,6 +168,14 @@ CREATE TABLE IF NOT EXISTS downloads (
  media_id VARCHAR(36),
  sort_order INT NOT NULL DEFAULT 0,
  FOREIGN KEY (media_id) REFERENCES media_files(id)
+);
+CREATE TABLE IF NOT EXISTS help_entries (
+ id BIGINT PRIMARY KEY AUTO_INCREMENT,
+ category VARCHAR(64) NOT NULL,
+ title VARCHAR(200) NOT NULL,
+ body LONGTEXT,
+ sort_order INT NOT NULL DEFAULT 0,
+ UNIQUE(category, title)
 );
 CREATE TABLE IF NOT EXISTS source_import_rows (
  source_key VARCHAR(200) PRIMARY KEY,

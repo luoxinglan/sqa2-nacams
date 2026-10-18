@@ -31,6 +31,12 @@ app:
     password: ${BOOTSTRAP_PASSWORD:}
   backup:
     cron: ${BACKUP_CRON:0 0 2 * * *}
+  library:
+    scan-cron: ${LIBRARY_SCAN_CRON:0 30 1 * * *}
+    holidays: ${LIBRARY_HOLIDAYS:}
+  validation:
+    name-min-length: ${NAME_MIN_LENGTH:2}
+    name-max-length: ${NAME_MAX_LENGTH:15}
   site:
     name: 网络攻防对抗技术研究所
     english-name: ${SITE_ENGLISH_NAME:}

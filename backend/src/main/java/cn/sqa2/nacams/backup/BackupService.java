@@ -22,7 +22,7 @@ import java.util.*;
 public class BackupService {
     private static final Logger LOG=LoggerFactory.getLogger(BackupService.class);
     public static final List<String> TABLES=List.of("users","teachers","students","signin_logs","books","borrow_requests","borrows",
-            "violations","notifications","library_config","theses","patents","projects","courses","textbooks","portal_content","media_files","downloads","source_import_rows");
+            "violations","notifications","library_config","theses","patents","projects","courses","textbooks","portal_content","media_files","downloads","help_entries","source_import_rows");
     private final Db db;private final ObjectMapper mapper;private final MediaService media;private final TransactionTemplate tx;
     public final Path root;private final String cron;
     public BackupService(Db db,ObjectMapper mapper,MediaService media,PlatformTransactionManager manager,
