@@ -83,6 +83,50 @@ class LibraryIntegrationTest {
     }
 
     @Test
+    void myBorrowHistoryIncludesOnlyOwnPendingRejectedAndApprovedWithoutDuplicates() throws Exception {
+        student("reader-one", "3120260031");
+        student("reader-two", "3120260032");
+        String reader = token("reader-one"), other = token("reader-two");
+        String manager = librarian("library-history", "6120100031");
+        long a = book("2026031", "申请状态测试甲"), b = book("2026032", "申请状态测试乙");
+        long request = response(mvc.perform(with(post("/api/v1/books/" + a + "/borrow-requests"), reader))
+                .andExpect(status().isOk())).path("data").path("id").asLong();
+        mvc.perform(with(get("/api/v1/me/borrows"), reader)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1)).andExpect(jsonPath("$.data.items[0].status").value("pending"));
+        mvc.perform(with(get("/api/v1/me/borrows"), other)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(0));
+        mvc.perform(with(post("/api/v1/admin/borrow-requests/" + request + "/reject"), manager)
+                .contentType("application/json").content("{\"reason\":\"申请人暂不借阅\"}")).andExpect(status().isOk());
+        mvc.perform(with(get("/api/v1/me/borrows"), reader)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].status").value("rejected"))
+                .andExpect(jsonPath("$.data.items[0].reason").value("申请人暂不借阅"));
+        long approved = response(mvc.perform(with(post("/api/v1/books/" + b + "/borrow-requests"), reader))
+                .andExpect(status().isOk())).path("data").path("id").asLong();
+        mvc.perform(with(post("/api/v1/admin/borrow-requests/" + approved + "/approve"), manager)).andExpect(status().isOk());
+        mvc.perform(with(get("/api/v1/me/borrows?page=1&page_size=1"), reader)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(2)).andExpect(jsonPath("$.data.items.length()").value(1));
+    }
+
+    @Test
+    void reminderWindowStartsThreeWorkdaysBeforeDueAndViolationStartsAfterDueDay() {
+        long reader = student("date-reader", "3120260041");
+        librarian("date-librarian", "6120100041");
+        long futureBook = book("2026041", "未来到期测试"), overdueBook = book("2026042", "刚逾期测试");
+        LocalDate monday = LocalDate.of(2026, 10, 26);
+        long future = borrow(reader, futureBook, monday, null);
+        // 周一到期，前三个工作日从上周三起。上周二不得提前提醒。
+        scheduler.scan(LocalDate.of(2026, 10, 20));
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE dedup_key LIKE ?", Long.class, "due:" + future + ":%")).isZero();
+        scheduler.scan(LocalDate.of(2026, 10, 21));
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE dedup_key LIKE ?", Long.class, "due:" + future + ":%")).isEqualTo(1);
+        long overdue = borrow(reader, overdueBook, LocalDate.of(2026, 10, 20), null);
+        scheduler.scan(LocalDate.of(2026, 10, 20));
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM violations WHERE borrow_id=?", Long.class, overdue)).isZero();
+        scheduler.scan(LocalDate.of(2026, 10, 21));
+        assertThat(db.jdbc.queryForObject("SELECT COUNT(*) FROM violations WHERE borrow_id=? AND status='pending'", Long.class, overdue)).isEqualTo(1);
+    }
+
+    @Test
     void validationRuleRejectsInvalidProfileAndValidateEndpointReturnsFields() throws Exception {
         var bad = new HashMap<String, Object>(Map.of("username", "bad-teacher", "password", "Test-Admin-2026",
                 "identityType", "teacher", "name", "测试教师", "teacherType", "full", "employeeNo", "7520200001"));

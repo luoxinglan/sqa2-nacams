@@ -31,7 +31,6 @@ public class LibraryScheduler {
 
     public Map<String, Object> scan(LocalDate today) {
         var settings = config.get();
-        LocalDate reminderDate = config.minusWorkdays(today, settings.remindBeforeWorkdays());
         var rows = db.jdbc.queryForList("SELECT b.id,b.user_id,b.book_id,b.due_at,books.code,books.title,u.active"
                 + " FROM borrows b JOIN books ON books.id=b.book_id JOIN users u ON u.id=b.user_id WHERE b.returned_at IS NULL");
         int dueReminders = 0, overdueReminders = 0, candidates = 0, skipped = 0;
@@ -41,6 +40,7 @@ public class LibraryScheduler {
             long userId = Db.id(row.get("user_id"));
             LocalDate dueDate = BorrowService.date(row.get("due_at"));
             if (dueDate == null) { skipped++; continue; }
+            LocalDate reminderDate = config.minusWorkdays(dueDate, settings.remindBeforeWorkdays());
             String code = Db.str(row, "code");
             String title = Db.str(row, "title");
             if (!today.isAfter(dueDate) && !today.isBefore(reminderDate)) {
@@ -57,7 +57,8 @@ public class LibraryScheduler {
                 if (notifications.notify(userId, "图书逾期提醒",
                         "《" + title + "》（" + code + "）已逾期 " + days + " 天，应还日期为 " + dueDate + "，请尽快归还。",
                         "overdue:" + borrowId + ":" + today)) overdueReminders++;
-                if (days >= 30) {
+                // 借期默认30个自然日；超过应还日期即触发候选，不能再等待逾期30天。
+                if (days > 0) {
                     int inserted = db.jdbc.update("INSERT INTO violations(user_id,borrow_id,status,reason) SELECT ?,?,'pending',? WHERE NOT EXISTS(SELECT 1 FROM violations WHERE borrow_id=?)",
                             userId, borrowId, "逾期 " + days + " 个自然日未归还（应还日期 " + dueDate + "）", borrowId);
                     if (inserted > 0) {

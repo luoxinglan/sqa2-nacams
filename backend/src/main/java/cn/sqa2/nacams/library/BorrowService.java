@@ -231,9 +231,16 @@ public class BorrowService {
     }
 
     public Map<String, Object> myBorrows(long userId, int page, int size) {
-        var args = new ArrayList<Object>();
-        args.add(userId);
-        return pagedBorrows(" WHERE b.user_id=?", args, page, size);
+        // 同一既有接口展示申请状态与借出历史；已批准申请仅保留对应借阅一条，避免重复。
+        String from = "FROM (SELECT id,borrowed_at AS event_at,'borrow' AS entry_type FROM borrows WHERE user_id=?"
+                + " UNION ALL SELECT id,requested_at AS event_at,'request' AS entry_type FROM borrow_requests"
+                + " WHERE user_id=? AND status IN ('pending','rejected')) entries";
+        var args = new ArrayList<Object>(List.of(userId, userId));
+        var result = db.page(from, args, "event_at DESC,entry_type,id DESC", page, size);
+        @SuppressWarnings("unchecked") var rows = (List<Map<String, Object>>) result.get("items");
+        result.put("items", rows.stream().map(row -> "request".equals(Db.str(row, "entry_type"))
+                ? requestView(Db.id(row.get("id"))) : borrowView(Db.id(row.get("id")))).toList());
+        return result;
     }
 
     public Map<String, Object> borrows(String status, int page, int size) {
