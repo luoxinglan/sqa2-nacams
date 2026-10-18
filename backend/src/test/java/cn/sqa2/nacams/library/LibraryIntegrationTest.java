@@ -315,6 +315,7 @@ class LibraryIntegrationTest {
         var flags = new LinkedHashMap<String, Boolean>();
         body.at("/data/items").forEach(item -> flags.put(item.at("/bookCode").asText(), item.at("/dueReminder").asBoolean()));
         assertThat(flags).containsEntry("2026001", true).containsEntry("2026002", false);
+        assertThat(body.at("/data/items/0/dueAt").asText()).matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}");
     }
 
     private long request(String studentToken, long bookId) throws Exception {
