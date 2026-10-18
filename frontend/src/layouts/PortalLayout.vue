@@ -49,7 +49,9 @@
     </header>
 
     <main class="portal-main">
-      <router-view />
+      <!-- key=fullPath：同组件不同参数的路由（ContentPage 各模式/PeoplePage 师生）切换时强制重挂载，
+           避免 setup 只跑一次导致页面配置停留在上一个栏目（10-18 录演示视频时发现的缺陷） -->
+      <router-view :key="$route.fullPath" />
     </main>
 
     <!-- 页脚：版权信息 + 三外链 + 地址（首页版权要求由页脚全站体现） -->
