@@ -55,5 +55,6 @@ python backend/tools/import_baseline.py \
 
 - 图书编号 B001 风格 → 导入时按 `--purchase-year 2026` 换算为 7 位编号（2026001），`legacy_code` 保留映射；
 - 借阅原始表无日期：仅生成 `datesSynthetic=true` 的已归还历史演示记录，不产生在借/违规；
-- 站点元数据（英文名/LOGO/版权）来自 `application-local.yml` 的 `app.site.*`（部署期配置口径）；
+- 站点元数据（英文名/LOGO/版权）来自 `application-local.yml` 的 `app.site.*`（部署期配置口径）；不配置时前端有兜底显示，页面不会缺元素；
+- 前端端口：默认 5173；若被占用 vite 会自动顺延到 5174/5175（后端 CORS 默认白名单已含），再往后需设环境变量 `CORS_ORIGINS`（逗号分隔完整 origin）；
 - 前端联调开关：`frontend/.env.development` 的 `VITE_USE_MOCK`（0=真实后端，1=mock 假数据）；生产构建固定走真实后端。

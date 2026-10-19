@@ -24,7 +24,8 @@ spring:
       max-request-size: 55MB
 app:
   storage: ${APP_STORAGE:./runtime}
-  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  # 5174/5175：5173 被占用时 vite 自动顺延端口（互评多组同机运行场景），避免登录 POST 因 CORS 被拒
+  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175}
   token-hours: 12
   bootstrap:
     username: ${BOOTSTRAP_USERNAME:admin}
